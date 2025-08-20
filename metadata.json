@@ -1,0 +1,8 @@
+{
+  "name": "Mystic Lore Garment Analyzer",
+  "description": "Upload an image of a garment to get a detailed analysis, a list of pattern pieces, and step-by-step instructions for drafting, cutting, and sewing.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "prompt": ""
+}
