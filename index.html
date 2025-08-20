@@ -163,17 +163,6 @@
             padding-bottom: 0.75rem;
         }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.3.1",
-    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-    "@google/genai": "https://esm.sh/@google/genai@0.14.0",
-    "jspdf": "https://esm.sh/jspdf@2.5.1",
-    "html2canvas": "https://esm.sh/html2canvas@1.4.1"
-  }
-}
-</script>
 <script>
     tailwind.config = {
       theme: {
@@ -207,11 +196,11 @@
 <body class="bg-theme-bg text-theme-text">
     <div id="root"></div>
     <script type="module">
-        import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-        import ReactDOM from 'react-dom/client';
-        import { GoogleGenAI, Type } from "@google/genai";
-        import jsPDF from 'jspdf';
-        import html2canvas from 'html2canvas';
+        import React, { useState, useCallback, useEffect, useRef, useMemo } from 'https://esm.sh/react@18.3.1';
+        import ReactDOM from 'https://esm.sh/react-dom@18.3.1/client';
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@0.14.0";
+        import jsPDF from 'https://esm.sh/jspdf@2.5.1';
+        import html2canvas from 'https://esm.sh/html2canvas@1.4.1';
 
         // --- Gemini Service ---
         const API_KEY = process.env.API_KEY;
