@@ -789,14 +789,25 @@
         };
 
         // --- App Component ---
+        let ai;
+        let apiKeyInitializationError = null;
+        try {
+            const API_KEY = process.env.API_KEY;
+            if (!API_KEY) {
+                throw new Error("API_KEY environment variable is not set. Please configure it to use the application.");
+            }
+            ai = new GoogleGenAI({ apiKey: API_KEY });
+        } catch (e) {
+            console.error(e);
+            apiKeyInitializationError = e.message;
+        }
+
         const App = () => {
             const [theme, setTheme] = useState('light');
             const [screen, setScreen] = useState('upload');
             const [imageFile, setImageFile] = useState(null);
             const [sewingGuide, setSewingGuide] = useState(null);
             const [error, setError] = useState(null);
-            const [ai, setAi] = useState(null);
-            const [apiKeyError, setApiKeyError] = useState(null);
 
             useEffect(() => {
                 if (theme === 'dark') {
@@ -805,20 +816,6 @@
                     document.body.classList.remove('dark');
                 }
             }, [theme]);
-
-            useEffect(() => {
-                try {
-                    const API_KEY = process.env.API_KEY;
-                    if (!API_KEY) {
-                        throw new Error("API_KEY environment variable is not set. Please configure it to use the application.");
-                    }
-                    const genAI = new GoogleGenAI({ apiKey: API_KEY });
-                    setAi(genAI);
-                } catch (e) {
-                    console.error(e);
-                    setApiKeyError(e.message);
-                }
-            }, []);
         
             const toggleTheme = useCallback(() => {
                 setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
@@ -826,7 +823,7 @@
         
             const handleImageSelected = useCallback((file) => {
                 if (!ai) {
-                    setError("Gemini AI client is not initialized.");
+                    setError(apiKeyInitializationError || "Gemini AI client is not initialized.");
                     setScreen('error');
                     return;
                 }
@@ -858,7 +855,7 @@
                      setError("Could not read the selected file.");
                      setScreen('error');
                 };
-            }, [ai]);
+            }, []);
         
             const handleReset = useCallback(() => {
                 setScreen('upload');
@@ -868,15 +865,17 @@
             }, []);
             
             const renderContent = () => {
-                if (apiKeyError) {
+                if (apiKeyInitializationError) {
                     return React.createElement('div', { className: 'text-center p-8 bg-theme-card-bg backdrop-blur-lg rounded-[20px] border border-theme-glass-border animate-fade-in max-w-lg shadow-xl' },
                         React.createElement(WarningIcon, { className: 'w-12 h-12 text-theme-error mx-auto' }),
                         React.createElement('h2', { className: 'mt-4 text-xl font-bold text-theme-text' }, 'Configuration Error'),
-                        React.createElement('p', { className: 'mt-2 text-sm text-theme-text-muted' }, apiKeyError),
+                        React.createElement('p', { className: 'mt-2 text-sm text-theme-text-muted' }, apiKeyInitializationError),
                     );
                 }
 
                 if (!ai) {
+                    // This will show a generic loader while the AI client initializes, though it's synchronous.
+                    // It also acts as a safeguard.
                     return React.createElement(Loader);
                 }
 
