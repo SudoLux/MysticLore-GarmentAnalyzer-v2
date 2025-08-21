@@ -1,101 +1,108 @@
-import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@0.14.0";
+
 import { SewingGuide } from "../types.ts";
 
-const responseSchema = {
-    type: Type.OBJECT,
-    properties: {
-        garmentAnalysis: {
-            type: Type.OBJECT,
-            properties: {
-                identifiedGarment: { type: Type.STRING, description: "E.g., 'High-Waisted A-Line Midi Skirt'" },
-                garmentDescription: { type: Type.STRING, description: "A short paragraph describing the key visual features of the garment in the image." },
-                keyFeatures: { type: Type.ARRAY, items: { type: Type.STRING }, description: "A list of key design elements. E.g., ['Pointed collar', 'Patch pockets']" },
-                styleCategory: { type: Type.STRING, description: "E.g. 'Jacket', 'Skirt', 'Blouse'" },
-                aiInsight: { type: Type.STRING, description: "A helpful tip or observation about construction or styling." },
-            },
-            required: ['identifiedGarment', 'garmentDescription', 'keyFeatures', 'styleCategory', 'aiInsight']
-        },
-        patternPieces: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    name: { type: Type.STRING, description: "E.g., 'Front Bodice', 'Sleeve'" },
-                    description: { type: Type.STRING, description: "A brief description of the piece and its key features." },
-                },
-                required: ['name', 'description']
+/**
+ * Resizes an image file to a maximum dimension while maintaining aspect ratio.
+ * @param file The image file to resize.
+ * @param maxDimension The maximum width or height of the resized image.
+ * @returns A promise that resolves with the base64-encoded image data and its MIME type.
+ */
+const resizeImage = (file: File, maxDimension: number): Promise<{ base64: string, mimeType: string }> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            if (!event.target?.result) {
+                return reject(new Error("Could not read file."));
             }
-        },
-        fabricAndNotions: {
-            type: Type.OBJECT,
-            properties: {
-                fabricSuggestions: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            name: { type: Type.STRING, description: "E.g., 'Linen', 'Cotton Poplin'" },
-                            reason: { type: Type.STRING, description: "Why this fabric is suitable." },
-                        },
-                        required: ['name', 'reason']
+            const img = new Image();
+            img.src = event.target.result as string;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let { width, height } = img;
+
+                if (width > height) {
+                    if (width > maxDimension) {
+                        height = Math.round(height * (maxDimension / width));
+                        width = maxDimension;
                     }
-                },
-                notions: { type: Type.ARRAY, items: { type: Type.STRING }, description: "A list of required notions. E.g., ['Matching thread', '7x 1/2\" buttons']" },
-                recommendedSeamAllowance: { type: Type.STRING, description: "E.g., '1/2 inch (1.5 cm)'" },
-            },
-            required: ['fabricSuggestions', 'notions', 'recommendedSeamAllowance']
-        },
-        sewingSteps: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    step: { type: Type.INTEGER },
-                    title: { type: Type.STRING, description: "A short, clear title for the step. E.g., 'Prepare and Sew Darts'" },
-                    details: { type: Type.STRING, description: "A concise explanation of how to perform the step." },
-                },
-                required: ['step', 'title', 'details']
-            }
-        }
-    },
-    required: ['garmentAnalysis', 'patternPieces', 'fabricAndNotions', 'sewingSteps']
+                } else {
+                    if (height > maxDimension) {
+                        width = Math.round(width * (maxDimension / height));
+                        height = maxDimension;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    return reject(new Error('Could not get canvas context for image resizing.'));
+                }
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const dataUrl = canvas.toDataURL(file.type);
+                const base64 = dataUrl.split(',')[1];
+                resolve({ base64, mimeType: file.type });
+            };
+            img.onerror = (err) => reject(new Error(`Image could not be loaded for resizing: ${err}`));
+        };
+        reader.onerror = (err) => reject(new Error(`File could not be read: ${err}`));
+    });
 };
 
-const SYSTEM_INSTRUCTION = `You are a world-class expert fashion designer, pattern maker, and sewing instructor. Your task is to analyze an image of a garment and produce a comprehensive, structured guide for recreating it in the specified JSON format. Be thorough, clear, and encouraging in your text.`;
-const USER_PROMPT = `Analyze the garment in the provided image and generate the sewing guide.`;
 
-export const generateSewingGuideFromImage = async (ai: GoogleGenAI, base64Image: string, imageType: string): Promise<SewingGuide> => {
-    const imagePart = {
-        inlineData: {
-            mimeType: imageType,
-            data: base64Image,
-        },
-    };
+/**
+ * Sends an image to the backend Netlify function for analysis by the Gemini API.
+ * @param file The image file of the garment.
+ * @param signal An AbortSignal to allow for request cancellation (e.g., on timeout).
+ * @returns A promise that resolves with the generated SewingGuide.
+ */
+export const generateSewingGuideFromImage = async (file: File, signal: AbortSignal): Promise<SewingGuide> => {
+    // Resize the image to prevent excessively large payloads
+    const { base64: base64Image, mimeType: imageType } = await resizeImage(file, 1600);
 
-    const textPart = {
-        text: USER_PROMPT,
-    };
+    const body = JSON.stringify({ base64Image, imageType });
 
     try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: { parts: [textPart, imagePart] },
-            config: {
-                systemInstruction: SYSTEM_INSTRUCTION,
-                responseMimeType: 'application/json',
-                responseSchema: responseSchema,
-                temperature: 0.2
-            }
+        const response = await fetch('/.netlify/functions/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body,
+            signal, // Pass the AbortSignal to the fetch request
         });
+
+        if (!response.ok) {
+            let errorMsg = `Error: ${response.status} ${response.statusText}`;
+            try {
+                // Try to parse a more specific error message from the backend
+                const errorJson = await response.json();
+                if (errorJson.error) {
+                    errorMsg = errorJson.error;
+                }
+            } catch (e) {
+                // Ignore if response body is not JSON or empty
+            }
+            throw new Error(errorMsg);
+        }
+
+        const result = await response.json();
         
-        const jsonText = response.text.trim();
-        const parsedData = JSON.parse(jsonText);
-        
-        return parsedData;
+        if (!result.ok) {
+            throw new Error(result.error || 'The analysis failed due to an unknown server error.');
+        }
+
+        if (!result.data || !result.data.garmentAnalysis) {
+            throw new Error("Received invalid or incomplete guide data from the server.");
+        }
+
+        return result.data as SewingGuide;
 
     } catch (e) {
-        console.error("Error generating guide from AI:", e);
-        const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
-        throw new Error(`Failed to generate sewing guide. ${errorMessage}`);
+        // Log the error and re-throw it to be handled by the UI component
+        if (e instanceof Error && e.name !== 'AbortError') {
+             console.error("Error calling backend function:", e);
+        }
+        throw e;
     }
 };
