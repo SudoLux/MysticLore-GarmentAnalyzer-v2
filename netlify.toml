@@ -1,16 +1,8 @@
 [build]
-  command = "npm ci && npm run build"
-  publish = "dist"
-  functions = "netlify/functions"
+  publish = "."
+  command = ""
 
-[functions]
-  node_bundler = "esbuild"
-
-# SPA fallback so deep-links work
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[build.environment]
-  NODE_VERSION = "18"
