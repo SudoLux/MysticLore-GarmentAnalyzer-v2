@@ -1,12 +1,12 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Header } from './components/Header.tsx';
-import { UploadScreen } from './components/UploadScreen.tsx';
-import { Loader } from './components/Loader.tsx';
-import { GuideViewer } from './components/GuideViewer.tsx';
-import { WarningIcon } from './components/Icons.tsx';
-import { generateSewingGuideFromImage } from './services/geminiService.ts';
-import { SewingGuide } from './types.ts';
+import { Header } from './components/Header';
+import { UploadScreen } from './components/UploadScreen';
+import { Loader } from './components/Loader';
+import { GuideViewer } from './components/GuideViewer';
+import { WarningIcon } from './components/Icons';
+import { generateSewingGuideFromImage } from './services/geminiService';
+import { SewingGuide } from './types';
 
 const App = () => {
     const [theme, setTheme] = useState('light');

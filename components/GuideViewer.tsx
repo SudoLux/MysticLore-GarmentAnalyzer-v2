@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { SewingGuide, GarmentAnalysis, PatternPiece, FabricAndNotions, SewingStep } from '../types.ts';
-import { ArrowUturnLeftIcon, CheckCircleIcon, DocumentArrowDownIcon, RulerIcon, ScissorsIcon, SparklesIcon, SwatchIcon } from './Icons.tsx';
+import { SewingGuide, GarmentAnalysis, PatternPiece, FabricAndNotions, SewingStep } from '../types';
+import { ArrowUturnLeftIcon, CheckCircleIcon, DocumentArrowDownIcon, RulerIcon, ScissorsIcon, SparklesIcon, SwatchIcon } from './Icons';
 
 const TABS = [
     { id: 'analysis', name: 'Analysis', icon: SparklesIcon },

@@ -1,5 +1,5 @@
 
-import { SewingGuide } from "../types.ts";
+import { SewingGuide } from "../types";
 
 /**
  * Resizes an image file to a maximum dimension while maintaining aspect ratio.
