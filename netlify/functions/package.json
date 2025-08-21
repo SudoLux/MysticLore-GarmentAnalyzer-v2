@@ -1,5 +1,2 @@
 {
-  "dependencies": {
-    "@google/genai": "^0.14.0"
-  }
 }
