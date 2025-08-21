@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { SparklesIcon } from './Icons.tsx';
+import { SparklesIcon } from './Icons';
 
 const loadingMessages = [
     'Our AI is drafting patterns and preparing your personalized sewing guide.',

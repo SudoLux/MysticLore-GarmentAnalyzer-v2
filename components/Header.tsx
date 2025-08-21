@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogoIcon, MoonIcon, SunIcon } from './Icons.tsx';
+import { LogoIcon, MoonIcon, SunIcon } from './Icons';
 
 interface HeaderProps {
     theme: string;
