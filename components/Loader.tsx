@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'https://esm.sh/react@18.3.1';
+import React, { useState, useEffect } from 'react';
 import { SparklesIcon } from './Icons.tsx';
 
 const loadingMessages = [

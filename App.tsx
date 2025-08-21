@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect, useRef } from 'https://esm.sh/react@18.3.1';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Header } from './components/Header.tsx';
 import { UploadScreen } from './components/UploadScreen.tsx';
 import { Loader } from './components/Loader.tsx';

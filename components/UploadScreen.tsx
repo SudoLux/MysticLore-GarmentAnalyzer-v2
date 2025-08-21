@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'https://esm.sh/react@18.3.1';
+import React, { useState, useCallback, useRef } from 'react';
 import { CameraIcon, UploadIcon } from './Icons.tsx';
 
 const SUPPORTED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];

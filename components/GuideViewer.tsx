@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'https://esm.sh/react@18.3.1';
-import jsPDF from 'https://esm.sh/jspdf@2.5.1';
-import html2canvas from 'https://esm.sh/html2canvas@1.4.1';
+import React, { useState, useMemo } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { SewingGuide, GarmentAnalysis, PatternPiece, FabricAndNotions, SewingStep } from '../types.ts';
 import { ArrowUturnLeftIcon, CheckCircleIcon, DocumentArrowDownIcon, RulerIcon, ScissorsIcon, SparklesIcon, SwatchIcon } from './Icons.tsx';
 
