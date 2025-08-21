@@ -13,6 +13,7 @@ import { SewingGuide } from './types.ts';
 let ai: GoogleGenAI | null = null;
 let apiKeyInitializationError: string | null = null;
 try {
+    // The API key is provided via the process.env.API_KEY environment variable.
     const API_KEY = process.env.API_KEY;
     if (!API_KEY) {
         throw new Error("API_KEY environment variable is not set. Please configure it in your deployment settings.");
