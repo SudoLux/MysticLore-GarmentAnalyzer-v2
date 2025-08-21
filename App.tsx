@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'https://esm.sh/react@18.3.1';
 import { GoogleGenAI } from "https://esm.sh/@google/genai@0.14.0";
 import { Header } from './components/Header.tsx';
@@ -14,7 +15,7 @@ let apiKeyInitializationError: string | null = null;
 try {
     const API_KEY = process.env.API_KEY;
     if (!API_KEY) {
-        throw new Error("API_KEY environment variable is not set. Please configure it to use the application.");
+        throw new Error("API_KEY environment variable is not set. Please configure it in your deployment settings.");
     }
     ai = new GoogleGenAI({ apiKey: API_KEY });
 } catch (e: unknown) {
